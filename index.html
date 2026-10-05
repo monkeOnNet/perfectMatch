@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Perfect Match</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: #238636;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: 8px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #000000;
+        }
+
+        .controls {
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        input[type="text"] {
+            width: 95%;
+            padding: 4px;
+        }
+
+        body {
+            font-family: 'American Typewriter';
+            background-color: #0d0f12;
+            color: #5ff15f;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .container {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            overflow-wrap: break-word;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #0d0f12;
+            border: 1px solid #30363d;
+            color: #5ff15f;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            letter-spacing: 2px;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+            letter-spacing: normal;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2ea043;
+        }
+
+        button:disabled {
+            background-color: #21542c;
+            color: #8b949e;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 25px;
+        }
+
+        .progress-bar-bg {
+            background-color: #0d0f12;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            background-color: #238636;
+            width: 0%;
+            height: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 3px;
+            font-size: 12px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .etc-text {
+            text-align: center;
+            font-size: 13px;
+            color: #8b949e;
+            margin-top: 8px;
+        }
+
+        #output {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #0d0f12;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            display: none;
+            word-break: break-all;
+            font-size: 12px;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .success {
+            border-color: #238636 !important;
+            color: #5ff15f;
+        }
+
+        .error {
+            border-color: #f85149 !important;
+            color: #f85149;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <div class="nav-buttons">
+            <button id="cb">Create</button>
+            <button id="tb">Take</button>
+            <button id="ab">About</button>
+        </div>
+        <div id="create" class="container" style="display:none">
+            <h2>Create</h2>
+            <input id="secret" type="text" placeholder="secret message goes here">
+            <div class="controls">
+                <button onclick="addRow()">+ Add Question</button>
+            </div>
+            <table id="questionTable">
+                <thead>
+                    <tr>
+                        <th>Statement Text</th>
+                        <th>Agree?</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" value="like cats"></td>
+                        <td><input type="checkbox" checked></td>
+                        <td><button onclick="deleteRow(this)">Delete</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button id="encryptBtn" style="margin-top: 15px;" onclick="generate()">Generate</button>
+
+            <div class="progress-container" id="progressContainer">
+                <label>Creating key...</label>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                    <div class="progress-text" id="progressPercent">0%</div>
+                </div>
+                <div class="etc-text" id="etcDisplay">Calculating estimated time remaining...</div>
+            </div>
+
+            <div id="output"></div>
+            <canvas id="canvas" style="display:none"></canvas>
+            <img id="qrImg" style="width:300px">
+
+        </div>
+
+        <div id="take" class="container" style="display:none">
+            <h2>Take</h2>
+            <!-- File Upload Selector -->
+            <div class="box">
+                <h3>1. Scan File</h3>
+                <input type="file" id="file-input" autocomplete="off" accept="image/*">
+            </div>
+
+            <!-- Camera Streaming Viewport -->
+            <div class="box">
+                <h3>2. Scan with Live Camera</h3>
+                <button id="start-btn">Start Camera</button>
+                <button id="stop-btn" disabled>Stop Camera</button>
+                <video id="video" playsinline></video>
+            </div>
+
+            <div id="result">Output will appear here...</div>
+            <table id="questionTable2">
+                <thead>
+                    <tr>
+                        <th>Statement Text</th>
+                        <th>Agree?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+            <div class="form-group">
+                <label for="encryptedBundle">Encrypted Message (Base64 String):</label>
+                <p id="encryptedBundle"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="cString">Binary Key:</label>
+                <p id="cString"></p>
+            </div>
+
+            <button id="decryptBtn" style="margin-top: 15px;" onclick="startDecryption()">Check Match</button>
+            <div class="progress-container" id="progressContainer2">
+                <label>Generating Cryptographic Key...</label>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar2"></div>
+                    <div class="progress-text" id="progressPercent2">0%</div>
+                </div>
+                <div class="etc-text" id="etcDisplay2">Calculating estimated time remaining...</div>
+            </div>
+
+            <div id="output2"></div>
+        </div>
+        <div id="aboutDiv" class="container" style="display:none">
+            <p>Perfect Match is a novel friend-finding/dating protocol. The protocol begins with creating a custom
+                questionnaire and providing a message to encrypt (preferably a contact method, like an email address).
+                The
+                reponses are used to generate an Argon2id key, which is then hashed 220 million times and used to
+                encrypt
+                the message. All relevant information, including a bare-bones html decoder, is then bundled into a QR
+                code
+                meant to be shared in the real world, like a pheremone marker. The extreme hashing loop serves to
+                dissuade
+                brute-force attacks through proof-of-work.</p>
+        </div>
+    </div>
+    <script src="hashwasm.js"></script>
+    <script src="qrcode.js"></script>
+    <script src="confetti.js"></script>
+    <script src="codereader.js"></script>
+
+    <script>
+
+        let decoderText = `Key<input id="k">Msg<input id="m"><button id="d">Do</button><p id="p"></p><script type="module">import{createSHA256,argon2id}from"https://cdn.jsdelivr.net/npm/hash-wasm@4.12.0/+esm";async function dc(e,t){try{const r=Uint8Array.from(atob(t),e=>e.charCodeAt(0)),[a,n,i]=[r.subarray(0,16),r.subarray(16,28),r.subarray(28)];let o=await argon2id({password:(new TextEncoder).encode(e),salt:a,iterations:2,memorySize:16384,parallelism:1,hashLength:32,outputType:"binary"});lg("Starting...");const c=await createSHA256(),d=22e7;for(let e=0;e<d;e++)c.init(),c.update(o),o=c.digest("binary"),(e+1)%1e7==0&&lg(Math.round((e+1)/d*100) + "%"),e%5e5==0&&await new Promise(e=>setTimeout(e,0));const s=await crypto.subtle.importKey("raw",o,"AES-GCM",!1,["decrypt"]),l=await crypto.subtle.decrypt({name:"AES-GCM",iv:n},s,i);lg((new TextDecoder).decode(l))}catch(e){lg("FAIL")}}function gd(e){return document.getElementById(e)}function lg(e){gd("p").innerText=e}window.dc=dc,gd("d").onclick=(()=>{dc(gd("k").value,gd("m").value)});<\/script>`
+
+        function addRow(quest = undefined) {
+            const table = document.getElementById("questionTable").getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+            const cell3 = newRow.insertCell(2);
+
+            let vl = (quest !== undefined) ? quest : ""
+
+            cell1.innerHTML = '<input type="text" placeholder="Enter statement..."' + 'value="' + vl + '">';
+            cell2.innerHTML = '<input type="checkbox">';
+            cell3.innerHTML = '<button onclick="deleteRow(this)">Delete</button>';
+        }
+
+        function addRow2(quest) {
+            const table = document.getElementById("questionTable2").getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+
+            let vl = (quest !== undefined) ? quest : ""
+
+            cell1.innerHTML = '<input type="text" placeholder="Enter statement..."' + 'value="' + vl + '">';
+            cell2.innerHTML = '<input type="checkbox">';
+        }
+
+        function deleteRow(btn) {
+            const row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        function getTableData() {
+            const tableRows = document.querySelectorAll("#questionTable tbody tr");
+            const data = [];
+
+            tableRows.forEach(row => {
+             
+                const questionInput = row.querySelector('input[type="text"]');
+                const checkboxInput = row.querySelector('input[type="checkbox"]');
+
+                if (questionInput && checkboxInput) {
+                    data.push({
+                        question: questionInput.value.trim(),
+                        isTicked: checkboxInput.checked
+                    });
+                }
+            });
+            return data;
+        }
+
+        function getTableData2() {
+            const tableRows = document.querySelectorAll("#questionTable2 tbody tr");
+            let data = "";
+
+            tableRows.forEach(row => {
+             
+                const questionInput = row.querySelector('input[type="text"]');
+                const checkboxInput = row.querySelector('input[type="checkbox"]');
+
+                if (questionInput && checkboxInput) {
+                    data += checkboxInput.checked ? "1" : "0"
+
+                }
+            });
+            return data;
+        }
+
+        gel("cb").onclick = () => {
+            gel("create").style.display = "block"
+            gel("take").style.display = "none"
+            gel("aboutDiv").style.display = "none"
+        }
+        gel("tb").onclick = () => {
+            gel("create").style.display = "none"
+            gel("take").style.display = "block"
+            gel("aboutDiv").style.display = "none"
+        }
+        gel("ab").onclick = () => {
+            gel("aboutDiv").style.display = "block"
+            gel("create").style.display = "none"
+            gel("take").style.display = "none"
+        }
+        function gel(id) {
+            return document.getElementById(id)
+        }
+
+        function shuffleStatements(data) {
+
+            for (let i = data.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+             
+                [data[i], data[j]] = [data[j], data[i]];
+            }
+
+            return data;
+        }
+
+
+        function generate() {
+
+            let data = getTableData()
+            data = shuffleStatements(data)
+            //console.log(data)
+            let string = ""
+            data.forEach(entry => {
+                string += entry.isTicked ? "1" : "0"
+            })
+
+            startEncryption(string, data)
+
+
+        }
+
+        const TOTAL_ITERATIONS = 220000000;
+        //const TOTAL_ITERATIONS = 22
+        const CHUNK_SIZE = 500000;
+        let isProcessing = false;
+
+        async function runTimeStretchingLoop(initialUint8Array, updateCallback) {
+            let currentHashBytes = initialUint8Array;
+            let completed = 0;
+            const startTime = performance.now();
+            const sha256Engine = await hashwasm.createSHA256();
+
+            return new Promise((resolve) => {
+                function processChunk() {
+                    if (!isProcessing) return;
+
+                    const chunkLimit = Math.min(CHUNK_SIZE, TOTAL_ITERATIONS - completed);
+
+                    for (let i = 0; i < chunkLimit; i++) {
+                        sha256Engine.init();
+                        sha256Engine.update(currentHashBytes);
+                        currentHashBytes = sha256Engine.digest("binary");
+                    }
+
+                    completed += chunkLimit;
+
+                    const now = performance.now();
+                    const elapsedSeconds = (now - startTime) / 1000;
+                    const progressFraction = completed / TOTAL_ITERATIONS;
+
+                    let etcSeconds = 0;
+                    if (progressFraction > 0) {
+                        const totalEstimatedTime = elapsedSeconds / progressFraction;
+                        etcSeconds = Math.max(0, totalEstimatedTime - elapsedSeconds);
+                    }
+
+                    updateCallback(progressFraction, etcSeconds);
+
+                    if (completed < TOTAL_ITERATIONS) {
+                        requestAnimationFrame(processChunk);
+                    } else {
+                        resolve(currentHashBytes);
+                    }
+                }
+                requestAnimationFrame(processChunk);
+            });
+        }
+
+        async function startEncryption(keyInput, statements) {
+            const secretText = document.getElementById("secret").value;
+
+
+            const btn = document.getElementById("encryptBtn");
+            const progressBox = document.getElementById("progressContainer");
+            const progressBar = document.getElementById("progressBar");
+            const progressPercent = document.getElementById("progressPercent");
+            const etcDisplay = document.getElementById("etcDisplay");
+            const output = document.getElementById("output");
+
+            if (!secretText) {
+                alert("Please enter a message to encrypt.");
+                return;
+            }
+
+            let statementString = ""
+
+            statements.forEach(entry => {
+                let q = entry.question.replaceAll("`", "'")
+                statementString += q + '`'
+            })
+
+            isProcessing = true;
+            btn.disabled = true;
+            output.style.display = "none";
+            progressBox.style.display = "block";
+
+            try {
+                // 1. Generate random Salt (16 bytes) and IV (12 bytes)
+                const salt = window.crypto.getRandomValues(new Uint8Array(16));
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+                // 2. Argon2id Key Derivation
+                etcDisplay.innerText = "Initializing security core (Argon2id)...";
+                const passwordBytes = new TextEncoder().encode(keyInput);
+                const argon2RawOutput = await hashwasm.argon2id({
+                    password: passwordBytes,
+                    salt: salt,
+                    iterations: 2,
+                    memorySize: 16384,
+                    parallelism: 1,
+                    hashLength: 32,
+                    outputType: "binary"
+                });
+
+                // 3. Sequential SHA-256 Time Stretching Loop (Non-blocking with UI progress updates)
+                const stretchedKeyBytes = await runTimeStretchingLoop(argon2RawOutput, (progress, etcSeconds) => {
+                    const pct = Math.floor(progress * 100);
+                    progressBar.style.width = pct + "%";
+                    progressPercent.innerText = pct + "%";
+
+                    const mins = Math.floor(etcSeconds / 60);
+                    const secs = Math.floor(etcSeconds % 60);
+                    etcDisplay.innerText = `Estimated Time Remaining: ${mins}m ${secs}s`;
+                });
+
+                // 4. AES-GCM Encryption
+                etcDisplay.innerText = "Finalizing encryption matrix...";
+                const aesKey = await window.crypto.subtle.importKey(
+                    "raw", stretchedKeyBytes, { name: "AES-GCM" }, false, ["encrypt"]
+                );
+                const encodedMessage = new TextEncoder().encode(secretText);
+                const ciphertextBuffer = await window.crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv }, aesKey, encodedMessage
+                );
+
+                // 5. Combine Salt (16) + IV (12) + Ciphertext into single payload
+                const ciphertextBytes = new Uint8Array(ciphertextBuffer);
+                const combined = new Uint8Array(salt.length + iv.length + ciphertextBytes.length);
+                combined.set(salt, 0);
+                combined.set(iv, salt.length);
+                combined.set(ciphertextBytes, salt.length + iv.length);
+
+                // Convert to Base64
+                const base64String = btoa(String.fromCharCode.apply(null, combined));
+
+                output.style.display = "block";
+                output.innerHTML = `<strong>Encrypted Data:</strong><br><br><span style="color: #ffffff; word-break: break-all;">${base64String}</span><br><br><strong>Key Seed:</strong> ${keyInput}<br>`;
+
+                etcDisplay.innerText = "Encryption successfully completed.";
+
+                let fullMessage = base64String + '`' + statementString + '`' + decoderText
+
+                fullMessage = fullMessage.replaceAll("``", "`")
+
+                //console.log(fullMessage)
+
+                //max is 2331
+
+                if (fullMessage.length > 2330) {
+                    let dif = fullMessage.length - 2330
+                    alert("Exceeded supported quiz size by " + dif + " bytes. Please reword statements or delete some.")
+                    return
+                }
+
+                QRCode.toCanvas(document.getElementById('canvas'), fullMessage, function (error) {
+                    if (error) console.error(error)
+                    console.log('success!');
+                })
+
+                gel("qrImg").src = gel("canvas").toDataURL('image/png');
+
+
+            } catch (err) {
+                alert("Error during encryption: " + err.message);
+                etcDisplay.innerText = "Sequence aborted.";
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+            }
+        }
+
+
+        async function startDecryption() {
+            isProcessing = false
+            const keyInput = getTableData2()
+
+            document.getElementById("cString").innerText = keyInput;
+            const payloadBase64 = document.getElementById("encryptedBundle").innerText.trim();
+
+            const uiBtn = document.getElementById("decryptBtn");
+            const uiProgressBox = document.getElementById("progressContainer2");
+            const uiBar = document.getElementById("progressBar2");
+            const uiPercent = document.getElementById("progressPercent2");
+            const uiEtc = document.getElementById("etcDisplay2");
+            const uiOutput = document.getElementById("output2");
+
+            isProcessing = true;
+            uiBtn.disabled = true;
+            uiOutput.style.display = "none";
+            uiProgressBox.style.display = "block";
+
+            try {
+                const combinedBytes = new Uint8Array(atob(payloadBase64).split("").map(c => c.charCodeAt(0)));
+                const salt = combinedBytes.slice(0, 16);
+                const iv = combinedBytes.slice(16, 28);
+                const ciphertextBytes = combinedBytes.slice(28);
+
+                uiEtc.innerText = "Initializing security core (Argon2id)...";
+                const passwordBytes = new TextEncoder().encode(keyInput);
+                const argon2RawOutput = await hashwasm.argon2id({
+                    password: passwordBytes,
+                    salt: salt,
+                    iterations: 2,
+                    memorySize: 16384,
+                    parallelism: 1,
+                    hashLength: 32,
+                    outputType: "binary"
+                });
+
+                const stretchedKeyBytes = await runTimeStretchingLoop(argon2RawOutput, (progress, etcSeconds) => {
+                    const pct = Math.floor(progress * 100);
+                    uiBar.style.width = pct + "%";
+                    uiPercent.innerText = pct + "%";
+
+                    const mins = Math.floor(etcSeconds / 60);
+                    const secs = Math.floor(etcSeconds % 60);
+                    uiEtc.innerText = `Estimated Time Remaining: ${mins}m ${secs}s`;
+                });
+
+                uiEtc.innerText = "Finalizing decryption matrix...";
+                const aesKey = await window.crypto.subtle.importKey(
+                    "raw", stretchedKeyBytes, { name: "AES-GCM" }, false, ["decrypt"]
+                );
+
+                const decryptedBuffer = await window.crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv }, aesKey, ciphertextBytes
+                );
+
+                const plaintext = new TextDecoder().decode(decryptedBuffer);
+
+                uiOutput.className = "success";
+                uiOutput.innerText = "PERFECT MATCH!:\n\n" + plaintext;
+                uiOutput.style.display = "block";
+                uiEtc.innerText = "Decryption successfully completed.";
+                try {
+
+                    setTimeout(() => { party() }, 10)
+                } catch (e) {
+
+                }
+
+            } catch (error) {
+                uiOutput.className = "error";
+                uiOutput.innerText = "DECIPHER ERROR: Authentication Failed.\nThe security key combination or payload is invalid.";
+                uiOutput.style.display = "block";
+                uiEtc.innerText = "Sequence aborted.";
+                console.log(error)
+            } finally {
+                isProcessing = false;
+                uiBtn.disabled = false;
+                window.scrollTo({
+                    top: document.body.scrollHeight || document.documentElement.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        function loadData(fullMessage) {
+            let cipherText = ""
+            let questions = []
+            document.querySelector("#questionTable2 tbody").innerHTML = "";
+
+            let parts = fullMessage.split("`")
+            cipherText = parts[0]
+
+            if (parts.length < 3) {
+                alert("Incompatible code: got message: " + cipherText)
+                return
+            }
+
+            document.getElementById("encryptedBundle").innerText = cipherText
+
+            for (let i = 1; i < parts.length - 1; i++) {
+                addRow2(parts[i])
+            }
+
+
+        }
+
+        const fileInput = document.getElementById('file-input');
+        const video = document.getElementById('video');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resultDiv = document.getElementById('result');
+
+        let videoStream = null;
+        let animationFrameId = null;
+
+        // Off-screen canvas used exclusively for extraction calculations
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        // --- Core Decoding Logic ---
+        function decodeQRFromCanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            // jsQR takes raw pixels, width, and height directly
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+
+            if (code) {
+                resultDiv.innerText = "Found QR Code!";
+                resultDiv.className = "success"
+                loadData(code.data)
+                return true;
+            }
+            return false;
+        }
+
+        // --- File Upload Processing ---
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length === 0) return;
+            stopCamera();
+
+            const file = e.target.files[0];
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+
+            img.onload = () => {
+                // Add padding frame buffer to protect digital exports without quiet zones
+                const padding = 40;
+                canvas.width = img.width + (padding * 2);
+                canvas.height = img.height + (padding * 2);
+
+                // CRITICAL: Fill with opaque white to instantly eliminate transparency issues
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw the actual QR image in the safe center zone
+                ctx.drawImage(img, padding, padding);
+
+                // Process the pixels
+                const success = decodeQRFromCanvas();
+                if (!success) {
+                    resultDiv.innerText = "Error: Code unreadable. Verify it is a valid QR matrix.";
+                    resultDiv.className = "error"
+                }
+                URL.revokeObjectURL(img.src);
+            };
+        });
+
+        // --- Live Camera Processing ---
+        async function startCamera() {
+            try {
+                resultDiv.innerText = "Requesting camera access...";
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+
+                video.srcObject = videoStream;
+                video.style.display = 'block';
+                video.play();
+
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                resultDiv.innerText = "Scanning live frames...";
+
+                // Begin the processing loop frame by frame
+                animationFrameId = requestAnimationFrame(tickCameraFrame);
+            } catch (err) {
+                resultDiv.innerText = `Camera Error: ${err.message}`;
+                resultDiv.className = "error"
+            }
+        }
+
+        function tickCameraFrame() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                if (decodeQRFromCanvas()) {
+                    stopCamera(); // Stop automatically once it hits a match
+                    return;
+                }
+            }
+            animationFrameId = requestAnimationFrame(tickCameraFrame);
+        }
+
+        function stopCamera() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            video.style.display = 'none';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+
+        let confettiFrameId = null;
+
+        function party() {
+            // 1. Stop any previously running confetti instance to avoid stacking loops
+            if (confettiFrameId) {
+                cancelAnimationFrame(confettiFrameId);
+                confettiFrameId = null;
+            }
+
+            // 2. Remove any existing canvas if party() was triggered again
+            let oldCanvas = document.getElementById('confetti-canvas');
+            if (oldCanvas) oldCanvas.remove();
+
+            var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+            var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+            var confCanvas = document.createElement('canvas');
+            confCanvas.id = 'confetti-canvas';
+            confCanvas.style.position = 'fixed';
+            confCanvas.style.top = '0';
+            confCanvas.style.left = '0';
+            confCanvas.style.width = '100vw';
+            confCanvas.style.height = '100vh';
+            confCanvas.width = width;
+            confCanvas.height = height;
+            confCanvas.style.zIndex = '999999';
+            confCanvas.style.pointerEvents = 'none';
+            document.body.appendChild(confCanvas);
+
+            var viewportConfetti = confetti.create(confCanvas, {
+                resize: true,
+                useWorker: false
+            });
+
+            var btn = document.getElementById("decryptBtn");
+            var originY = 0.7;
+
+            if (btn) {
+                var rect = btn.getBoundingClientRect();
+                if (rect.height > 0) {
+                    originY = (rect.top + (rect.height / 2)) / height;
+                    originY = Math.max(0.1, Math.min(0.9, originY));
+                }
+            }
+
+            // 3. Infinite animation loop
+            function frame() {
+                viewportConfetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: originY }
+                });
+
+                viewportConfetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: originY }
+                });
+
+                // Continue running on every frame indefinitely
+                confettiFrameId = requestAnimationFrame(frame);
+            }
+
+            confettiFrameId = requestAnimationFrame(frame);
+        }
+
+        // Optional helper function to stop the confetti whenever needed (e.g., when switching tabs)
+        function stopParty() {
+            if (confettiFrameId) {
+                cancelAnimationFrame(confettiFrameId);
+                confettiFrameId = null;
+            }
+            let canvas = document.getElementById('confetti-canvas');
+            if (canvas) canvas.remove();
+        }  
+    </script>
+    <script src="questions.js"></script>
+
+</body>
+
+</html>
